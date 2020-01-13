@@ -1,0 +1,17 @@
+This project uses https://aec.gov.au AEC electorate shape files and elector counts, 
+https://www.abs.gov.au ABS electorate details, and voting patterns on climate change 
+for the corresponding parliamentarians sourced from https://theyvoteforyou.org.au/.
+See References.txt file.
+
+The AEC and ABS data is © Commonwealth of Australia.
+
+While one can't assert categorically what an individual politician may personally 
+think regarding climate change, what they have stated on public record and their 
+personal voting patterns give a good guide. The climate change rating is my subjective 
+assessment of their climate change position based on public statements and how they
+have historically voted.  The rational for the assessments are recorded in the
+Representatives.xlsx and Senate.xlsx files.
+
+The image is created using Python's matplotlib libraries.
+
+The code and source software is provided subject to GNU GPL 3.0.

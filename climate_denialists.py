@@ -1,25 +1,19 @@
 """Maps Federal Representatives position on climate change based on their voting history to the jurisdications on an Australian map
 
-This product (XXXX) incorporates data that is:
+This product (climate_denialists.py) incorporates data that is:
     © Commonwealth of Australia (Australian Electoral Commission) 2020
     © Commonwealth of Australia (Australian Bureau of Statistics) 2020
 
 """
 
 import pandas as pd
-import re
-from datetime import date
-
 import numpy as np
 import matplotlib.pyplot as plt
 import shapefile as shp
-
 from mpl_toolkits.axes_grid1.inset_locator import TransformedBbox, BboxPatch, BboxConnector, Bbox, zoomed_inset_axes, mark_inset
-
 #hack to get Basemap working in default install environment
 import os
 os.environ['PROJ_LIB']='C:\\Users\\Andy\\Anaconda3\\pkgs\\proj4-5.2.0-ha925a31_1\\Library\\share'
-
 from mpl_toolkits.basemap import Basemap
 
 __author__ = "Andrew Arch"
@@ -214,7 +208,7 @@ def read_shapefile(sf):
         sf (shapefile): the shapefile containing the shapes
 
     Returns:
-        dataframe: dateframe of shapefile coords
+        dataframe: dataframe of shapefile coords
     """
 
     fields = [x[0] for x in sf.fields][1:]
