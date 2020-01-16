@@ -364,13 +364,15 @@ def plot_map(sf):
         # determine the colour of the electorate based on the representatives climate support stance
         climate_support = representatives.loc[electorate_name].values[4]
         electorate_colour = 'k'
-        if climate_support == 1: # climate denier
+        if climate_support == 0: # active climate denier
+            electorate_colour = 'm'
+        elif climate_support == 1: # climate denier
             electorate_colour = 'r'
         elif climate_support == 2: # fence sitter
             electorate_colour = 'y'
         elif climate_support == 3: # accepts the science
             electorate_colour = 'g'
-        
+                
         elect_min_x = x_electorate_points[electorate][0][0]
         elect_max_x = x_electorate_points[electorate][0][0]
         elect_min_y = y_electorate_points[electorate][0][0]
@@ -651,24 +653,35 @@ def plot_map(sf):
 
     #print the summary table
     senator_box_ulc = [0.005, 0.845]
-    senator_box_lrc = [0.245, 0.805]
+    senator_box_lrc = [0.301, 0.802]
     senator_box_llc = [senator_box_ulc[0], senator_box_lrc[1]]
     senator_box_urc = [senator_box_lrc[0], senator_box_ulc[1]]
     senator_box_ml = [senator_box_ulc[0], senator_box_llc[1] + ((senator_box_ulc[1] - senator_box_llc[1])/2)]
     senator_box_mr = [senator_box_urc[0], senator_box_ml[1]]
-    senator_box_vert1_x = 0.067
-    senator_box_vert2_x = 0.125
-    senator_box_vert3_x = 0.174
+    senator_box_vert1_x = 0.066
+    senator_box_vert2_x = 0.1221
+    senator_box_vert3_x = 0.179
+    senator_box_vert4_x = 0.2293
+
+    type_txt_x = 0.01
+    active_deniers_txt_x = 0.095
+    deniers_txt_x = 0.15
+    inbetweeners_txt_x = 0.205
+    accepts_science_txt_x = 0.265
 
     senator_box_fill_x = [senator_box_vert1_x, senator_box_vert2_x, senator_box_vert2_x, senator_box_vert1_x, senator_box_vert1_x]
     senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
-    ax.fill(senator_box_fill_x, senator_box_fill_y, color='r', alpha=0.6, transform=ax.transAxes)
+    ax.fill(senator_box_fill_x, senator_box_fill_y, color='m', alpha=0.6, transform=ax.transAxes)
     
     senator_box_fill_x = [senator_box_vert2_x, senator_box_vert3_x, senator_box_vert3_x, senator_box_vert2_x, senator_box_vert2_x]
     senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
-    ax.fill(senator_box_fill_x, senator_box_fill_y, color='y', alpha=0.6, transform=ax.transAxes)
+    ax.fill(senator_box_fill_x, senator_box_fill_y, color='r', alpha=0.6, transform=ax.transAxes)
 
-    senator_box_fill_x = [senator_box_vert3_x, senator_box_urc[0], senator_box_lrc[0], senator_box_vert3_x, senator_box_vert3_x]
+    senator_box_fill_x = [senator_box_vert3_x, senator_box_vert4_x, senator_box_vert4_x, senator_box_vert3_x, senator_box_vert3_x]
+    senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
+    ax.fill(senator_box_fill_x, senator_box_fill_y, color='y', alpha=0.6, transform=ax.transAxes)
+    
+    senator_box_fill_x = [senator_box_vert4_x, senator_box_urc[0], senator_box_lrc[0], senator_box_vert4_x, senator_box_vert4_x]
     senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
     ax.fill(senator_box_fill_x, senator_box_fill_y, color='g', alpha=0.6, transform=ax.transAxes)
 
@@ -696,14 +709,24 @@ def plot_map(sf):
     senator_box_x = [senator_box_vert3_x, senator_box_vert3_x]
     senator_box_y = [senator_box_ulc[1], senator_box_llc[1]]
     ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    
+    #vertical_divider
+    senator_box_x = [senator_box_vert4_x, senator_box_vert4_x]
+    senator_box_y = [senator_box_ulc[1], senator_box_llc[1]]
+    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    
+    senator_heading_y = 0.83
+    senator_values_y = 0.81
 
-    ax.text(0.095, 0.83, 'Climate Deniers', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.15, 0.83, 'Inbetweeners', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.21, 0.83, 'Accepts the Science', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)    
-    ax.text(0.01, 0.81, 'Senators: ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.1, 0.81, str(len(senator_climate_deniers)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.15, 0.81, str(len(senator_fence_sitters)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.21, 0.81, str(len(senator_accepting_of_the_science)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(active_deniers_txt_x,senator_heading_y, 'Active Deniers', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(deniers_txt_x, senator_heading_y, 'Climate Deniers', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(inbetweeners_txt_x, senator_heading_y, 'Inbetweeners', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(accepts_science_txt_x, senator_heading_y, 'Accepts the Science', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)    
+    ax.text(type_txt_x, senator_values_y, 'Senators: ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(active_deniers_txt_x, senator_values_y, str(len(senator_active_climate_deniers)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(deniers_txt_x, senator_values_y, str(len(senator_climate_deniers)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(inbetweeners_txt_x, senator_values_y, str(len(senator_fence_sitters)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(accepts_science_txt_x, senator_values_y, str(len(senator_accepting_of_the_science)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
 
     rep_box_ulc = [senator_box_ulc[0], 0.765]
     rep_box_lrc = [senator_box_lrc[0], 0.705]
@@ -716,16 +739,21 @@ def plot_map(sf):
     rep_box_vert1_x = senator_box_vert1_x
     rep_box_vert2_x = senator_box_vert2_x
     rep_box_vert3_x = senator_box_vert3_x
+    rep_box_vert4_x = senator_box_vert4_x
 
     rep_box_fill_x = [rep_box_vert1_x, rep_box_vert2_x, rep_box_vert2_x, rep_box_vert1_x, rep_box_vert1_x]
     rep_box_fill_y = [rep_box_ulc[1], rep_box_ulc[1], rep_box_llc[1], rep_box_llc[1], rep_box_ulc[1]]
-    ax.fill(rep_box_fill_x, rep_box_fill_y, color='r', alpha=0.6, transform=ax.transAxes)
+    ax.fill(rep_box_fill_x, rep_box_fill_y, color='m', alpha=0.6, transform=ax.transAxes)
     
     rep_box_fill_x = [rep_box_vert2_x, rep_box_vert3_x, rep_box_vert3_x, rep_box_vert2_x, rep_box_vert2_x]
     rep_box_fill_y = [rep_box_ulc[1], rep_box_ulc[1], rep_box_llc[1], rep_box_llc[1], rep_box_ulc[1]]
+    ax.fill(rep_box_fill_x, rep_box_fill_y, color='r', alpha=0.6, transform=ax.transAxes)
+
+    rep_box_fill_x = [rep_box_vert4_x, rep_box_vert4_x, rep_box_vert4_x, rep_box_vert3_x, rep_box_vert3_x]
+    rep_box_fill_y = [rep_box_ulc[1], rep_box_ulc[1], rep_box_llc[1], rep_box_llc[1], rep_box_ulc[1]]
     ax.fill(rep_box_fill_x, rep_box_fill_y, color='y', alpha=0.6, transform=ax.transAxes)
 
-    rep_box_fill_x = [rep_box_vert3_x, rep_box_urc[0], rep_box_lrc[0], rep_box_vert3_x, rep_box_vert3_x]
+    rep_box_fill_x = [rep_box_vert4_x, rep_box_urc[0], rep_box_lrc[0], rep_box_vert4_x, rep_box_vert4_x]
     rep_box_fill_y = [rep_box_ulc[1], rep_box_ulc[1], rep_box_llc[1], rep_box_llc[1], rep_box_ulc[1]]
     ax.fill(rep_box_fill_x, rep_box_fill_y, color='g', alpha=0.6, transform=ax.transAxes)
 
@@ -758,22 +786,34 @@ def plot_map(sf):
     rep_box_y = [rep_box_ulc[1], rep_box_llc[1]]
     ax.plot(rep_box_x, rep_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
 
-    ax.text(0.095, 0.75, 'Climate Deniers', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.15, 0.75, 'Inbetweeners', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.21, 0.75, 'Accepts the Science', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)    
-    ax.text(0.01, 0.73, 'Representatives: ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.095, 0.73, str(len(representative_climate_deniers)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.15, 0.73, str(len(representative_fence_sitters)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.21, 0.73, str(len(representative_accepting_of_the_science)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10) 
-    ax.text(0.01, 0.71, 'Voters: ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.1, 0.71, str(format(representative_climate_deniers['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.15, 0.71, str(format(representative_fence_sitters['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
-    ax.text(0.21, 0.71, str(format(representative_accepting_of_the_science['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    #vertical_divider
+    rep_box_x = [rep_box_vert4_x, rep_box_vert4_x]
+    rep_box_y = [rep_box_ulc[1], rep_box_llc[1]]
+    ax.plot(rep_box_x, rep_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+
+    representative_heading_y = 0.75
+    representative_values_y = 0.73
+    representative_voter_values_y = 0.71
+
+    ax.text(active_deniers_txt_x, representative_heading_y, 'Active Deniers', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(deniers_txt_x, representative_heading_y, 'Climate Deniers', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(inbetweeners_txt_x, representative_heading_y, 'Inbetweeners', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(accepts_science_txt_x, representative_heading_y, 'Accepts the Science', horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)    
+    ax.text(type_txt_x, representative_values_y, 'Representatives: ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(active_deniers_txt_x, representative_values_y, str(len(representative_active_climate_deniers)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(deniers_txt_x, representative_values_y, str(len(representative_climate_deniers)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(inbetweeners_txt_x, representative_values_y, str(len(representative_fence_sitters)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(accepts_science_txt_x, representative_values_y, str(len(representative_accepting_of_the_science)), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10) 
+    ax.text(type_txt_x, representative_voter_values_y, 'Voters: ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(active_deniers_txt_x, representative_voter_values_y, str(format(representative_active_climate_deniers['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(deniers_txt_x, representative_voter_values_y, str(format(representative_climate_deniers['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(inbetweeners_txt_x, representative_voter_values_y, str(format(representative_fence_sitters['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
+    ax.text(accepts_science_txt_x, representative_voter_values_y, str(format(representative_accepting_of_the_science['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
 
     #display the map
-    plt.draw()
-    plt.show()
-    #plt.savefig('Federal_Climate_Denialists.png')
+    #plt.draw()
+    #plt.show()
+    plt.savefig('Federal_Climate_Denialists.png')
 
 #read the shape file
 sf = shp.Reader('./data/national-esri-fe2019/COM_ELB_region.shp')
@@ -788,11 +828,13 @@ df = read_shapefile(sf)
 
 #load details on the representatives and senators
 representatives = pd.read_excel('./data/Representatives.xlsx', index_col='Electorate')
+representative_active_climate_deniers = representatives[representatives['Climate Change Support']==0]
 representative_climate_deniers = representatives[representatives['Climate Change Support']==1]
 representative_fence_sitters = representatives[representatives['Climate Change Support']==2]
 representative_accepting_of_the_science = representatives[representatives['Climate Change Support']==3]
 
 senators = pd.read_excel('./data/Senate.xlsx', index_col='Senator')
+senator_active_climate_deniers = senators[senators['Climate Change Support']==0]
 senator_climate_deniers = senators[senators['Climate Change Support']==1]
 senator_fence_sitters = senators[senators['Climate Change Support']==2]
 senator_accepting_of_the_science = senators[senators['Climate Change Support']==3]
