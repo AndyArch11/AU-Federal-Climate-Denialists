@@ -6,6 +6,8 @@ https://www.abs.gov.au/AUSSTATS/abs@.nsf/DetailsPage/2082.02019?OpenDocument
 
 https://www.aph.gov.au/Senators_and_Members/Parliamentarian_Search_Results?q=&mem=1&par=-1&gen=0&ps=96&st=1
 
+https://www.igismap.com/australia-shapefile-download/
+
 https://en.wikipedia.org/wiki/Members_of_the_Australian_Senate,_2019%E2%80%932022
 https://en.wikipedia.org/wiki/Members_of_the_Australian_House_of_Representatives,_2019%E2%80%932022
 
