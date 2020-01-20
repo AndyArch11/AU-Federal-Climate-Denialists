@@ -44,6 +44,14 @@ m.drawmeridians(np.arange(100,180,20))
 
 m.readshapefile('./data/Igismap/Australia_Polygon', 'Australia_Polygon')
 
+def fill_cell(x, y, colour, value):
+    #fill given cell.
+    alpha = 0.6
+    if int(value) > 0:
+        alpha = 1
+
+    ax.fill(x, y, color=colour, transform=ax.transAxes, alpha=alpha, zorder=10)
+
 def display_table(cell_values, upper_left_corner, state):
     #print the summary table
     # senator_box_ulc = [0.005, 0.845]    
@@ -74,64 +82,69 @@ def display_table(cell_values, upper_left_corner, state):
     inbetweeners_txt_x = senator_box_vert3_x + 0.005
     accepts_science_txt_x = senator_box_vert4_x + 0.005
 
-    senator_box_fill_x = [senator_box_ulc[0], senator_box_vert1_x, senator_box_vert1_x, senator_box_ulc[0], senator_box_ulc[0]]
+    #fill first column
+    senator_box_fill_col0_x = [senator_box_ulc[0], senator_box_vert1_x, senator_box_vert1_x, senator_box_ulc[0], senator_box_ulc[0]]
     senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
-    ax.fill(senator_box_fill_x, senator_box_fill_y, color='w', transform=ax.transAxes, zorder=10)
+    ax.fill(senator_box_fill_col0_x, senator_box_fill_y, color='w', transform=ax.transAxes, zorder=10)
 
-    senator_box_fill_x = [senator_box_vert1_x, senator_box_vert2_x, senator_box_vert2_x, senator_box_vert1_x, senator_box_vert1_x]
-    senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
-    ax.fill(senator_box_fill_x, senator_box_fill_y, color='m', transform=ax.transAxes, zorder=10)
+    #fill heading row
+    senator_box_fill_col1_x = [senator_box_vert1_x, senator_box_vert2_x, senator_box_vert2_x, senator_box_vert1_x, senator_box_vert1_x]
+    senator_box_fill_row0_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_ml1[1], senator_box_ml1[1], senator_box_ulc[1]]
+    ax.fill(senator_box_fill_col1_x, senator_box_fill_row0_y, color='m', transform=ax.transAxes, zorder=10)
     
-    senator_box_fill_x = [senator_box_vert2_x, senator_box_vert3_x, senator_box_vert3_x, senator_box_vert2_x, senator_box_vert2_x]
-    senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
-    ax.fill(senator_box_fill_x, senator_box_fill_y, color='r', transform=ax.transAxes, zorder=10)
+    senator_box_fill_col2_x = [senator_box_vert2_x, senator_box_vert3_x, senator_box_vert3_x, senator_box_vert2_x, senator_box_vert2_x]
+    ax.fill(senator_box_fill_col2_x, senator_box_fill_row0_y, color='r', transform=ax.transAxes, zorder=10)
 
-    senator_box_fill_x = [senator_box_vert3_x, senator_box_vert4_x, senator_box_vert4_x, senator_box_vert3_x, senator_box_vert3_x]
-    senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
-    ax.fill(senator_box_fill_x, senator_box_fill_y, color='y', transform=ax.transAxes, zorder=10)
+    senator_box_fill_col3_x = [senator_box_vert3_x, senator_box_vert4_x, senator_box_vert4_x, senator_box_vert3_x, senator_box_vert3_x]
+    ax.fill(senator_box_fill_col3_x, senator_box_fill_row0_y, color='y', transform=ax.transAxes, zorder=10)
     
-    senator_box_fill_x = [senator_box_vert4_x, senator_box_urc[0], senator_box_lrc[0], senator_box_vert4_x, senator_box_vert4_x]
-    senator_box_fill_y = [senator_box_ulc[1], senator_box_ulc[1], senator_box_llc[1], senator_box_llc[1], senator_box_ulc[1]]
-    ax.fill(senator_box_fill_x, senator_box_fill_y, color='g', transform=ax.transAxes, zorder=10)
+    senator_box_fill_col4_x = [senator_box_vert4_x, senator_box_urc[0], senator_box_lrc[0], senator_box_vert4_x, senator_box_vert4_x]
+    ax.fill(senator_box_fill_col4_x, senator_box_fill_row0_y, color='g', transform=ax.transAxes, zorder=10)
 
+    line_colour = 'k'
     #outline
     senator_box_x = [senator_box_ulc[0], senator_box_urc[0], senator_box_lrc[0], senator_box_llc[0], senator_box_ulc[0]]
     senator_box_y = [senator_box_ulc[1], senator_box_urc[1], senator_box_lrc[1], senator_box_llc[1], senator_box_ulc[1]]
-    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    ax.plot(senator_box_x, senator_box_y, color=line_colour, linewidth=0.25, transform=ax.transAxes, zorder=15)
 
     #midline
     senator_box_x = [senator_box_ml1[0], senator_box_mr1[0]]
     senator_box_y = [senator_box_ml1[1], senator_box_mr1[1]]
-    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    ax.plot(senator_box_x, senator_box_y, color=line_colour, linewidth=0.25, transform=ax.transAxes, zorder=15)
 
     senator_box_x = [senator_box_ml2[0], senator_box_mr2[0]]
     senator_box_y = [senator_box_ml2[1], senator_box_mr2[1]]
-    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    ax.plot(senator_box_x, senator_box_y, color=line_colour, linewidth=0.25, transform=ax.transAxes, zorder=15)
 
     senator_box_x = [senator_box_ml3[0], senator_box_mr3[0]]
     senator_box_y = [senator_box_ml3[1], senator_box_mr3[1]]
-    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    ax.plot(senator_box_x, senator_box_y, color=line_colour, linewidth=0.25, transform=ax.transAxes, zorder=15)
 
     #vertical divider
     senator_box_x = [senator_box_vert1_x, senator_box_vert1_x]
     senator_box_y = [senator_box_ulc[1], senator_box_llc[1]]
-    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    ax.plot(senator_box_x, senator_box_y, color=line_colour, linewidth=0.25, transform=ax.transAxes, zorder=15)
 
     #vertical_divider
     senator_box_x = [senator_box_vert2_x, senator_box_vert2_x]
     senator_box_y = [senator_box_ulc[1], senator_box_llc[1]]
-    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    ax.plot(senator_box_x, senator_box_y, color=line_colour, linewidth=0.25, transform=ax.transAxes, zorder=15)
     
     #vertical_divider
     senator_box_x = [senator_box_vert3_x, senator_box_vert3_x]
     senator_box_y = [senator_box_ulc[1], senator_box_llc[1]]
-    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    ax.plot(senator_box_x, senator_box_y, color=line_colour, linewidth=0.25, transform=ax.transAxes, zorder=15)
     
     #vertical_divider
     senator_box_x = [senator_box_vert4_x, senator_box_vert4_x]
     senator_box_y = [senator_box_ulc[1], senator_box_llc[1]]
-    ax.plot(senator_box_x, senator_box_y, color='0.6', linewidth=0.25, transform=ax.transAxes)
+    ax.plot(senator_box_x, senator_box_y, color=line_colour, linewidth=0.25, transform=ax.transAxes, zorder=15)
+
+    row1_box_y = [senator_box_ml1[1], senator_box_ml1[1], senator_box_ml2[1], senator_box_ml2[1], senator_box_ml1[1]]
+    row2_box_y = [senator_box_ml2[1], senator_box_ml2[1], senator_box_ml3[1], senator_box_ml3[1], senator_box_ml2[1]]
+    row3_box_y = [senator_box_ml3[1], senator_box_ml3[1], senator_box_lrc[1], senator_box_lrc[1], senator_box_ml3[1]]
     
+    #header row text
     ax.text(type_txt_x,senator_heading_y, state, horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
     ax.text(active_deniers_txt_x,senator_heading_y, 'Active Deniers', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
     ax.text(deniers_txt_x, senator_heading_y, 'Climate Deniers', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
@@ -139,21 +152,33 @@ def display_table(cell_values, upper_left_corner, state):
     ax.text(accepts_science_txt_x, senator_heading_y, 'Accepts the Science', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)   
     #2022 Term
     ax.text(type_txt_x, senator_term1_values_y, 'Senators (' + str(first_term) + '): ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col1_x, row1_box_y, 'm', cell_values[0][0])
     ax.text(active_deniers_txt_x, senator_term1_values_y, cell_values[0][0], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col2_x, row1_box_y, 'r', cell_values[0][1])
     ax.text(deniers_txt_x, senator_term1_values_y, cell_values[0][1], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col3_x, row1_box_y, 'y', cell_values[0][2])
     ax.text(inbetweeners_txt_x, senator_term1_values_y, cell_values[0][2], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col4_x, row1_box_y, 'g', cell_values[0][3])
     ax.text(accepts_science_txt_x, senator_term1_values_y, cell_values[0][3], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
     #2025 Term       
     ax.text(type_txt_x, senator_term2_values_y, 'Senators (' + str(second_term) + '): ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col1_x, row2_box_y, 'm', cell_values[1][0])
     ax.text(active_deniers_txt_x, senator_term2_values_y, cell_values[1][0], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col2_x, row2_box_y, 'r', cell_values[1][1])
     ax.text(deniers_txt_x, senator_term2_values_y, cell_values[1][1], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col3_x, row2_box_y, 'y', cell_values[1][2])
     ax.text(inbetweeners_txt_x, senator_term2_values_y, cell_values[1][2], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col4_x, row2_box_y, 'g', cell_values[1][3])
     ax.text(accepts_science_txt_x, senator_term2_values_y, cell_values[1][3], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
     #Total       
     ax.text(type_txt_x, senator_total_values_y, 'Senators (total): ', horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col1_x, row3_box_y, 'm', cell_values[2][0])
     ax.text(active_deniers_txt_x, senator_total_values_y, cell_values[2][0], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col2_x, row3_box_y, 'r', cell_values[2][1])
     ax.text(deniers_txt_x, senator_total_values_y, cell_values[2][1], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col3_x, row3_box_y, 'y', cell_values[2][2])
     ax.text(inbetweeners_txt_x, senator_total_values_y, cell_values[2][2], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
+    fill_cell(senator_box_fill_col4_x, row3_box_y, 'g', cell_values[2][3])
     ax.text(accepts_science_txt_x, senator_total_values_y, cell_values[2][3], horizontalalignment='left', color='k', transform=ax.transAxes, fontsize=9, zorder=20)
 
 state_names = pd.read_csv('./data/1989 States.csv')
