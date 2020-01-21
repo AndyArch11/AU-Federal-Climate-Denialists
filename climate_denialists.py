@@ -416,7 +416,7 @@ def plot_map(sf):
             x0_map, y0_map = m(x0, y0)
 
             #print electorate name where the area is large enough to display it
-            if row == 0 and electorate_area > min_national_electorate_area:
+            if row == 0 and (electorate_area > min_national_electorate_area or electorate_name == 'Herbert'):
                 ax.text(x0_map, y0_map, electorate_name, fontsize=8, zorder=600)
 
             #map the inset map jurisdictions and determine where to display the electorate names in the inset maps
