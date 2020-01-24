@@ -1,6 +1,6 @@
 """Displays ABS data by matching electorate count based on data denial representation of that electorate
 
-This product (climate_denialists.py) incorporates data that is:
+This product (abs.py) incorporates data that is:
     © Commonwealth of Australia (Australian Electoral Commission) 2020
     © Commonwealth of Australia (Australian Bureau of Statistics) 2020
 
