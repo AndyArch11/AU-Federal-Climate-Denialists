@@ -210,13 +210,12 @@ for i in columns:
             str_bin = pd.DataFrame(data={'State': dataset_labels, 'Count': np.zeros(len(dataset_labels))})        
         elif bin_step_type == 'decay':
             x_bin = bin_start
-            dataset_bin_array = []
-            dataset_bin_array.append(x_bin)
+            dataset_bin = []
+            dataset_bin.append(x_bin)
             while x_bin < bin_stop:
                 x_bin *= bin_step                
-                dataset_bin_array.append(x_bin)
+                dataset_bin.append(x_bin)
             #dataset_bin = np.array(dataset_bin_array)
-            dataset_bin = dataset_bin_array
             dataset_labels = dataset_bin[1:]
 
         if bin_format == 'int':
