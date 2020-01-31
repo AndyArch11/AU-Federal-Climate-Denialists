@@ -112,7 +112,7 @@ family_C_bin = [0.20, 0.62, 0.02, 'increment', 'perc']
 family_D_bin = [0.08, 0.28, 0.02, 'increment', 'perc']
 family_E_bin = [0.00, 0.08, 0.01, 'increment', 'perc']
 family_bins = [family_Rel_bin, family_B_bin, family_C_bin, family_D_bin, family_E_bin]
-income_Rel_bin = [0, 3100, 100, 'increment', 'dollar']
+income_Rel_bin = [0, 3100, 100, 'increment', 'dollar'] #Relative values don't really work as income/rent are weekly and mortgage is monthly
 income_B_bin = [800, 2500, 100, 'increment', 'dollar']
 income_C_bin = [75, 650, 25, 'increment', 'dollar']
 income_D_bin = [900, 3100, 100, 'increment', 'dollar']
@@ -270,7 +270,7 @@ for i in columns:
 
         if bin_format == 'int':
             #format as integers
-            dataset_labels = ['{:,}'.format(round(x)) for x in dataset_labels]
+            dataset_labels = ['{:,}'.format(round(number=x, ndigits=None)) for x in dataset_labels]
             dataset_labels[0] = '<' + dataset_labels[0]
             dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
         elif bin_format == 'float':
@@ -280,12 +280,12 @@ for i in columns:
             dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
         elif bin_format == 'perc':
             #format as percentage
-            dataset_labels = [str(round(x * 100)) + '%' for x in dataset_labels]
+            dataset_labels = [str(round(number=(x * 100), ndigits=None)) + '%' for x in dataset_labels]
             dataset_labels[0] = '<' + dataset_labels[0]
             dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
         elif bin_format == 'dollar':
             #format as dollar
-            dataset_labels = ['$' + str(round(x)) for x in dataset_labels]
+            dataset_labels = ['$' + str(round(number=x, ndigits=None)) for x in dataset_labels]
             dataset_labels[0] = '<' + dataset_labels[0]
             dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
 
@@ -403,7 +403,7 @@ plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, w
 if to_screen:
     plt.show()
 else:
-    output_path = './diagrams/' + rel_str + 'Representation by ' + abs_cat + '.png'
+    output_path = './diagrams/line graphs/' + rel_str + 'Representation by ' + abs_cat + '.png'
     plt.savefig(output_path)
 
 
