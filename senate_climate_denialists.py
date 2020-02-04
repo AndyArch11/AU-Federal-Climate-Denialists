@@ -279,4 +279,4 @@ for index, state_name in state_names.iterrows():
 
 #display the map
 #plt.show()
-plt.savefig('Australian_Senate_Climate_Denialists.png')
+plt.savefig('./diagrams/Australian_Senate_Climate_Denialists.png')

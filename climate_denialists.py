@@ -811,9 +811,8 @@ def plot_map(sf):
     ax.text(accepts_science_txt_x, representative_voter_values_y, str(format(representative_accepting_of_the_science['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
 
     #display the map
-    #plt.draw()
     #plt.show()
-    plt.savefig('Federal_Climate_Denialists.png')
+    plt.savefig('./diagrams/Federal_Climate_Denialists.png')
 
 #read the shape file
 sf = shp.Reader('./data/national-esri-fe2019/COM_ELB_region.shp')

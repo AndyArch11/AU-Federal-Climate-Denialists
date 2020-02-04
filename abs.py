@@ -26,7 +26,7 @@ show_all_deniers = False
 show_types_of_deniers = True
 show_accepts_the_science = True
 show_relative = False #if True, all graphs on same figure get the same scale, otherwise if false, each graph is optimised for its own data range. 
-show_senate = True #If False, shows representatives, if true, shows senate
+show_senate = True #If True, shows senate on 'resident' figure, otherwise exclude senate details
 data_category = 0 #which data set to use - 0 to 8 ['resident', 'age', 'family', 'income', 'tenure', 'cultural diversity', 'employment', 'occupation', 'education']
 to_screen = True
 
@@ -397,13 +397,17 @@ for i in columns:
 rel_str = ''
 if show_relative:
     rel_str = 'Relative Axes '
+
+den_str = ''
+if show_all_deniers:
+    den_str = 'All Deniers '
     
 plt.suptitle(rel_str + 'Federal Climate Change Denial Electoral Representation by ' + abs_cat)
 plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
 if to_screen:
     plt.show()
 else:
-    output_path = './diagrams/line graphs/' + rel_str + 'Representation by ' + abs_cat + '.png'
+    output_path = './diagrams/line graphs/' + rel_str + 'Representation by ' + den_str + abs_cat + '.png'
     plt.savefig(output_path)
 
 
