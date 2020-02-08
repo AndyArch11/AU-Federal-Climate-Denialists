@@ -25,10 +25,10 @@ show_total = False
 show_all_deniers = False
 show_types_of_deniers = True
 show_accepts_the_science = True
-show_relative = False #if True, all graphs on same figure get the same scale, otherwise if false, each graph is optimised for its own data range. 
+show_relative = True #if True, all graphs on same figure get the same scale, otherwise if false, each graph is optimised for its own data range. 
 show_senate = True #If True, shows senate on 'resident' figure, otherwise exclude senate details
-data_category = 0 #which data set to use - 0 to 8 ['resident', 'age', 'family', 'income', 'tenure', 'cultural diversity', 'employment', 'occupation', 'education']
-to_screen = True
+data_category = [0,1,2,3,4,5,6,7,8] #which data set to use - 0 to 8 ['resident', 'age', 'family', 'income', 'tenure', 'cultural diversity', 'employment', 'occupation', 'education']
+to_screen = False
 
 def climate_label (row):
     """Create a user friendly name for the Climate Change Support value
@@ -125,7 +125,7 @@ tenure_I_bin = [0.00, 0.04, 0.01, 'increment', 'perc']
 tenure_J_bin = [0.00, 0.06, 0.01, 'increment', 'perc']
 tenure_bins = [tenure_Rel_bin, tenure_F_bin, tenure_G_bin, tenure_H_bin, tenure_I_bin, tenure_J_bin]
 culture_Rel_bin = [0.00, 0.62, 0.02, 'increment', 'perc']
-culture_B_bin = [0.00, 0.44, 0.01, 'increment', 'perc']
+culture_B_bin = [0.00, 0.42, 0.01, 'increment', 'perc']
 culture_C_bin = [0.02, 0.56, 0.02, 'increment', 'perc']
 culture_D_bin = [0.00, 0.31, 0.01, 'increment', 'perc']
 culture_E_bin = [0.01, 0.61, 0.01, 'increment', 'perc']
@@ -170,244 +170,245 @@ abs_file = './data/commonwealth electorate data.xls'
 index_column = 0
 skip_rows = 5
 
-abs_cat = abs_category[data_category]
-abs_data = pd.read_excel(abs_file, sheet_name=abs_df_metadata.loc[abs_cat]['Sheet'], header=abs_df_metadata.loc[abs_cat]['Header Row'], usecols=abs_df_metadata.loc[abs_cat]['Columns'], skiprows=skip_rows, nrows=abs_df_metadata.loc[abs_cat]['Number Rows'], index_col=index_column)
-abs_data.dropna(axis='index', how='all', inplace=True)
-abs_data.index = abs_data.index.str.lower()
+for category in data_category:
+    abs_cat = abs_category[category]
+    abs_data = pd.read_excel(abs_file, sheet_name=abs_df_metadata.loc[abs_cat]['Sheet'], header=abs_df_metadata.loc[abs_cat]['Header Row'], usecols=abs_df_metadata.loc[abs_cat]['Columns'], skiprows=skip_rows, nrows=abs_df_metadata.loc[abs_cat]['Number Rows'], index_col=index_column)
+    abs_data.dropna(axis='index', how='all', inplace=True)
+    abs_data.index = abs_data.index.str.lower()
 
-#load representatives data
-excel_columns = 'C,F'
-if abs_cat == 'resident':
-    excel_columns = 'D,H,C,F'
-representatives_data = pd.read_excel('./data/Representatives.xlsx', index_col='Electorate', usecols=excel_columns)
-representatives_data.index = representatives_data.index.str.lower()
-
-#merge both dataframes
-abs_data = abs_data.merge(representatives_data, left_index=True, right_index=True)
-abs_data['Climate Label'] = abs_data.apply(climate_label, axis=1)
-if abs_cat == 'resident':
-    abs_data['Population Density'] = abs_data.apply(pop_density, axis=1)
-    abs_data['State'] = [x.upper() for x in abs_data['State']]
-
-#load senate data
-if show_senate and abs_cat == 'resident':
+    #load representatives data
     excel_columns = 'C,F'
-    senate_data = pd.read_excel('./data/Senate.xlsx', usecols=excel_columns)
-    senate_data['Senate State'] = senate_data.apply(statename_to_stateabbrev, axis=1)
-    senate_data['Climate Label'] = senate_data.apply(climate_label, axis=1)
+    if abs_cat == 'resident':
+        excel_columns = 'D,H,C,F'
+    representatives_data = pd.read_excel('./data/Representatives.xlsx', index_col='Electorate', usecols=excel_columns)
+    representatives_data.index = representatives_data.index.str.lower()
 
-    #add a placeholder column to the representatives data
-    abs_data['Senate State'] = np.zeros(len(abs_data))
+    #merge both dataframes
+    abs_data = abs_data.merge(representatives_data, left_index=True, right_index=True)
+    abs_data['Climate Label'] = abs_data.apply(climate_label, axis=1)
+    if abs_cat == 'resident':
+        abs_data['Population Density'] = abs_data.apply(pop_density, axis=1)
+        abs_data['State'] = [x.upper() for x in abs_data['State']]
 
-columns = list(abs_data)
+    #load senate data
+    if show_senate and abs_cat == 'resident':
+        excel_columns = 'C,F'
+        senate_data = pd.read_excel('./data/Senate.xlsx', usecols=excel_columns)
+        senate_data['Senate State'] = senate_data.apply(statename_to_stateabbrev, axis=1)
+        senate_data['Climate Label'] = senate_data.apply(climate_label, axis=1)
 
-#create figure for the graphs
-fig = plt.figure(figsize=[24, 13])
+        #add a placeholder column to the representatives data
+        abs_data['Senate State'] = np.zeros(len(abs_data))
 
-# determine layout of graphs
-if (len(columns) - 2) <= 2 or (len(columns) - 2) > 4:
-    fig_rows = int((len(columns) - 2)/5) + 1
-    fig_cols = math.ceil((len(columns) - 2)/fig_rows)
-else:
-    fig_rows = 2
-    fig_cols = 2
-ax_number = 1
+    columns = list(abs_data)
 
-# create a graph per data column of selected dataset
-for i in columns:  
-    if i != 'Climate Change Support' and i != 'Climate Label':
-        abs_subset = pd.DataFrame({i: abs_data[i], 'Climate Change Support': abs_data['Climate Change Support'], 'Climate Label': abs_data['Climate Label']}, index=abs_data.index) 
-        
-        #add new axes to figure
-        ax = plt.subplot(fig_rows, fig_cols, ax_number)        
-        
-        if i == 'Senate State':
-            ax.set_ylabel('Senators')
+    #create figure for the graphs
+    fig = plt.figure(figsize=[24, 13])
 
-        else:
-            ax.set_ylabel('Representatives/Electorates')
+    # determine layout of graphs
+    if (len(columns) - 2) <= 2 or (len(columns) - 2) > 4:
+        fig_rows = int((len(columns) - 2)/5) + 1
+        fig_cols = math.ceil((len(columns) - 2)/fig_rows)
+    else:
+        fig_rows = 2
+        fig_cols = 2
+    ax_number = 1
 
-        #start, stop, steps or increment values, step type, format type
-        if show_relative and abs_cat != 'resident':
-            bin_index = 0
-        else:
-            bin_index = ax_number
+    # create a graph per data column of selected dataset
+    for i in columns:  
+        if i != 'Climate Change Support' and i != 'Climate Label':
+            abs_subset = pd.DataFrame({i: abs_data[i], 'Climate Change Support': abs_data['Climate Change Support'], 'Climate Label': abs_data['Climate Label']}, index=abs_data.index) 
+            
+            #add new axes to figure
+            ax = plt.subplot(fig_rows, fig_cols, ax_number)        
+            
+            if i == 'Senate State':
+                ax.set_ylabel('Senators')
 
-        if not show_relative and len(abs_df_metadata.loc[abs_cat]['Bins'][bin_index]) > 5:            
-            bin_start = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][5]
-            bin_stop = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][6]
-            bin_step = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][7]
-            bin_step_type = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][8]
-            bin_format = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][4]
-        else:
-            bin_start = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][0]
-            bin_stop = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][1]
-            bin_step = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][2]
-            bin_step_type = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][3]
-            bin_format = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][4]
+            else:
+                ax.set_ylabel('Representatives/Electorates')
 
-        #when using non-integer steps, results are inconsistent with using np.arange, so using linspace instead even though arange would be simpler to create the bins and labels from
-        if bin_step_type == 'steps':
-            dataset_bin = np.linspace(start=bin_start, stop=bin_stop, num=bin_step)
-            dataset_bin = np.around(dataset_bin, decimals=2)
-            dataset_labels = dataset_bin[1:]
-        elif bin_step_type == 'increment':
-            number = round((bin_stop - bin_start)/bin_step) + 1
-            dataset_bin = np.linspace(start=bin_start, stop=bin_stop, num=number)
-            dataset_bin = np.around(dataset_bin, decimals=2)
-            dataset_labels = dataset_bin[1:]
-        elif bin_step_type == 'str_value':
-            str_bin = pd.DataFrame(data={i: aus_states, 'Count': np.zeros(len(aus_states))})        
-        elif bin_step_type == 'decay':
-            x_bin = bin_start
-            dataset_bin = []
-            dataset_bin.append(x_bin)
-            while x_bin < bin_stop:
-                x_bin *= bin_step                
+            #start, stop, steps or increment values, step type, format type
+            if show_relative and abs_cat != 'resident':
+                bin_index = 0
+            else:
+                bin_index = ax_number
+
+            if not show_relative and len(abs_df_metadata.loc[abs_cat]['Bins'][bin_index]) > 5:            
+                bin_start = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][5]
+                bin_stop = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][6]
+                bin_step = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][7]
+                bin_step_type = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][8]
+                bin_format = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][4]
+            else:
+                bin_start = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][0]
+                bin_stop = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][1]
+                bin_step = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][2]
+                bin_step_type = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][3]
+                bin_format = abs_df_metadata.loc[abs_cat]['Bins'][bin_index][4]
+
+            #when using non-integer steps, results are inconsistent with using np.arange, so using linspace instead even though arange would be simpler to create the bins and labels from
+            if bin_step_type == 'steps':
+                dataset_bin = np.linspace(start=bin_start, stop=bin_stop, num=bin_step)
+                dataset_bin = np.around(dataset_bin, decimals=2)
+                dataset_labels = dataset_bin[1:]
+            elif bin_step_type == 'increment':
+                number = round((bin_stop - bin_start)/bin_step) + 1
+                dataset_bin = np.linspace(start=bin_start, stop=bin_stop, num=number)
+                dataset_bin = np.around(dataset_bin, decimals=2)
+                dataset_labels = dataset_bin[1:]
+            elif bin_step_type == 'str_value':
+                str_bin = pd.DataFrame(data={i: aus_states, 'Count': np.zeros(len(aus_states))})        
+            elif bin_step_type == 'decay':
+                x_bin = bin_start
+                dataset_bin = []
                 dataset_bin.append(x_bin)
-            #dataset_bin = np.array(dataset_bin_array)
-            dataset_labels = dataset_bin[1:]
+                while x_bin < bin_stop:
+                    x_bin *= bin_step                
+                    dataset_bin.append(x_bin)
+                #dataset_bin = np.array(dataset_bin_array)
+                dataset_labels = dataset_bin[1:]
 
-        if bin_format == 'int':
-            #format as integers
-            dataset_labels = ['{:,}'.format(round(number=x, ndigits=None)) for x in dataset_labels]
-            dataset_labels[0] = '<' + dataset_labels[0]
-            dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
-        elif bin_format == 'float':
-            #format as float to 2 decimal places
-            dataset_labels = ['{:,}'.format(round(x, 2)) for x in dataset_labels]
-            dataset_labels[0] = '<' + dataset_labels[0]
-            dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
-        elif bin_format == 'perc':
-            #format as percentage
-            dataset_labels = [str(round(number=(x * 100), ndigits=None)) + '%' for x in dataset_labels]
-            dataset_labels[0] = '<' + dataset_labels[0]
-            dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
-        elif bin_format == 'dollar':
-            #format as dollar
-            dataset_labels = ['$' + str(round(number=x, ndigits=None)) for x in dataset_labels]
-            dataset_labels[0] = '<' + dataset_labels[0]
-            dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
+            if bin_format == 'int':
+                #format as integers
+                dataset_labels = ['{:,}'.format(round(number=x, ndigits=None)) for x in dataset_labels]
+                dataset_labels[0] = '<' + dataset_labels[0]
+                dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
+            elif bin_format == 'float':
+                #format as float to 2 decimal places
+                dataset_labels = ['{:,}'.format(round(x, 2)) for x in dataset_labels]
+                dataset_labels[0] = '<' + dataset_labels[0]
+                dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
+            elif bin_format == 'perc':
+                #format as percentage
+                dataset_labels = [str(round(number=(x * 100), ndigits=None)) + '%' for x in dataset_labels]
+                dataset_labels[0] = '<' + dataset_labels[0]
+                dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
+            elif bin_format == 'dollar':
+                #format as dollar
+                dataset_labels = ['$' + str(round(number=x, ndigits=None)) for x in dataset_labels]
+                dataset_labels[0] = '<' + dataset_labels[0]
+                dataset_labels[len(dataset_labels) - 1] = '>' + dataset_labels[len(dataset_labels) - 1]
 
-        #add lines to axes
-        if show_types_of_deniers:
-            if i == 'Senate State':
-                active_climate_deniers = senate_data[senate_data['Climate Change Support']==0]
-            else:
-                active_climate_deniers = abs_subset[abs_subset['Climate Change Support']==0]
-            if bin_format == 'str':  
-                active_climate_deniers_count = str_bin.copy(deep=True)
-                active_climate_deniers_bins = pd.DataFrame(data=active_climate_deniers[i].value_counts())  
-                for index, bin_value in active_climate_deniers_bins.iterrows():
-                    active_climate_deniers_count.loc[(active_climate_deniers_count[i]==index), 'Count'] = bin_value[0]
-                active_climate_deniers_count.set_index(i, inplace=True)
-                active_climate_deniers_count.rename(columns={'Count': active_climate_deniers['Climate Label'].iat[0]}, inplace=True)
-            else:
-                active_climate_deniers_bins = pd.cut(x=active_climate_deniers[i], bins=dataset_bin, labels=dataset_labels)
-                active_climate_deniers_count = active_climate_deniers.groupby(active_climate_deniers_bins)[i].agg('count')
-            active_climate_deniers_count.plot(ax=ax, color='m', label=active_climate_deniers['Climate Label'].iat[0])
-
-            if i == 'Senate State':
-                climate_deniers = senate_data[senate_data['Climate Change Support']==1]
-            else:
-                climate_deniers = abs_subset[abs_subset['Climate Change Support']==1]                        
-            if bin_format == 'str':
-                climate_deniers_count = str_bin.copy(deep=True)
-                climate_deniers_bins = pd.DataFrame(data=climate_deniers[i].value_counts())
-                for index, bin_value in climate_deniers_bins.iterrows():
-                    climate_deniers_count.loc[(climate_deniers_count[i]==index), 'Count'] = bin_value[0]
-                climate_deniers_count.set_index(i, inplace=True)
-                climate_deniers_count.rename(columns={'Count': climate_deniers['Climate Label'].iat[0]}, inplace=True)
-            else:
-                climate_deniers_bins = pd.cut(x=climate_deniers[i], bins=dataset_bin, labels=dataset_labels)
-                climate_deniers_count = climate_deniers.groupby(climate_deniers_bins)[i].agg('count')
-            climate_deniers_count.plot(ax=ax, color='r', label=climate_deniers['Climate Label'].iat[0])
-
-            if i == 'Senate State':
-                fence_sitters = senate_data[senate_data['Climate Change Support']==2]
-            else:
-                fence_sitters = abs_subset[abs_subset['Climate Change Support']==2]       
-            if bin_format == 'str':
-                fence_sitters_count = str_bin.copy(deep=True)
-                fence_sitters_bins = pd.DataFrame(data=fence_sitters[i].value_counts())
-                for index, bin_value in fence_sitters_bins.iterrows():
-                    fence_sitters_count.loc[(fence_sitters_count[i]==index), 'Count'] = bin_value[0]
-                fence_sitters_count.set_index(i, inplace=True)
-                fence_sitters_count.rename(columns={'Count': fence_sitters['Climate Label'].iat[0]}, inplace=True)
-            else:
-                fence_sitters_bins = pd.cut(x=fence_sitters[i], bins=dataset_bin, labels=dataset_labels)
-                fence_sitters_count = fence_sitters.groupby(fence_sitters_bins)[i].agg('count')
-            fence_sitters_count.plot(ax=ax, color='y', label=fence_sitters['Climate Label'].iat[0])
-
-        if show_all_deniers:
-            if i == 'Senate State':
-                deniers_and_doubters = senate_data[(senate_data['Climate Change Support']>=0) & (senate_data['Climate Change Support']<=2)]
-            else:
-                deniers_and_doubters = abs_subset[(abs_subset['Climate Change Support']>=0) & (abs_subset['Climate Change Support']<=2)]      
-            if bin_format == 'str':
-                deniers_and_doubters_count = str_bin.copy(deep=True)
-                deniers_and_doubters_bins = pd.DataFrame(data=deniers_and_doubters[i].value_counts())
-                for index, bin_value in deniers_and_doubters_bins.iterrows():
-                    deniers_and_doubters_count.loc[(deniers_and_doubters_count[i]==index), 'Count'] = bin_value[0]
-                deniers_and_doubters_count.set_index(i, inplace=True)
-                deniers_and_doubters_count.rename(columns={'Count': 'Deniers and Doubters'}, inplace=True)
-            else:
-                deniers_and_doubters_bins = pd.cut(x=deniers_and_doubters[i], bins=dataset_bin, labels=dataset_labels)
-                deniers_and_doubters_count = deniers_and_doubters.groupby(deniers_and_doubters_bins)[i].agg('count')
-            deniers_and_doubters_count.plot(ax=ax, color='b', label='Deniers and Doubters')
-
-        if show_accepts_the_science:
-            if i == 'Senate State':
-                accepting_of_the_science = senate_data[senate_data['Climate Change Support']==3] 
-            else:
-                accepting_of_the_science = abs_subset[abs_subset['Climate Change Support']==3]     
-            if bin_format == 'str':
-                accepting_of_the_science_count = str_bin.copy(deep=True)
-                accepting_of_the_science_bins = pd.DataFrame(data=accepting_of_the_science[i].value_counts())
-                for index, bin_value in accepting_of_the_science_bins.iterrows():
-                    accepting_of_the_science_count.loc[(accepting_of_the_science_count[i]==index), 'Count'] = bin_value[0]
-                accepting_of_the_science_count.set_index(i, inplace=True)
-                accepting_of_the_science_count.rename(columns={'Count': accepting_of_the_science['Climate Label'].iat[0]}, inplace=True)
-            else:
-                accepting_of_the_science_bins = pd.cut(x=accepting_of_the_science[i], bins=dataset_bin, labels=dataset_labels)
-                accepting_of_the_science_count = accepting_of_the_science.groupby(accepting_of_the_science_bins)[i].agg('count')
-            accepting_of_the_science_count.plot(ax=ax, color='g', label=accepting_of_the_science['Climate Label'].iat[0])
-
-        if show_total:             
-            if bin_format == 'str':
+            #add lines to axes
+            if show_types_of_deniers:
                 if i == 'Senate State':
-                    show_total_bins = pd.DataFrame(data=senate_data[i].value_counts())
+                    active_climate_deniers = senate_data[senate_data['Climate Change Support']==0]
                 else:
-                    show_total_bins = pd.DataFrame(data=abs_subset[i].value_counts())
-                show_total_count = str_bin.copy(deep=True)
-                for index, bin_value in show_total_bins.iterrows():
-                    show_total_count.loc[(show_total_count[i]==index), 'Count'] = bin_value[0]
-                show_total_count.set_index(i, inplace=True)
-                show_total_count.rename(columns={'Count': 'Total ' + abs_cat}, inplace=True)
-            else:
-                show_total_bins = pd.cut(x=abs_subset[i], bins=dataset_bin, labels=dataset_labels) 
-                show_total_count = abs_subset.groupby(show_total_bins)[i].agg('count')
-            show_total_count.plot(ax=ax, color='k', label='Total ' + abs_cat)
+                    active_climate_deniers = abs_subset[abs_subset['Climate Change Support']==0]
+                if bin_format == 'str':  
+                    active_climate_deniers_count = str_bin.copy(deep=True)
+                    active_climate_deniers_bins = pd.DataFrame(data=active_climate_deniers[i].value_counts())  
+                    for index, bin_value in active_climate_deniers_bins.iterrows():
+                        active_climate_deniers_count.loc[(active_climate_deniers_count[i]==index), 'Count'] = bin_value[0]
+                    active_climate_deniers_count.set_index(i, inplace=True)
+                    active_climate_deniers_count.rename(columns={'Count': active_climate_deniers['Climate Label'].iat[0]}, inplace=True)
+                else:
+                    active_climate_deniers_bins = pd.cut(x=active_climate_deniers[i], bins=dataset_bin, labels=dataset_labels)
+                    active_climate_deniers_count = active_climate_deniers.groupby(active_climate_deniers_bins)[i].agg('count')
+                active_climate_deniers_count.plot(ax=ax, color='m', label=active_climate_deniers['Climate Label'].iat[0])
 
-        ax.grid(True)
-        ax.legend()
-        ax_number += 1
+                if i == 'Senate State':
+                    climate_deniers = senate_data[senate_data['Climate Change Support']==1]
+                else:
+                    climate_deniers = abs_subset[abs_subset['Climate Change Support']==1]                        
+                if bin_format == 'str':
+                    climate_deniers_count = str_bin.copy(deep=True)
+                    climate_deniers_bins = pd.DataFrame(data=climate_deniers[i].value_counts())
+                    for index, bin_value in climate_deniers_bins.iterrows():
+                        climate_deniers_count.loc[(climate_deniers_count[i]==index), 'Count'] = bin_value[0]
+                    climate_deniers_count.set_index(i, inplace=True)
+                    climate_deniers_count.rename(columns={'Count': climate_deniers['Climate Label'].iat[0]}, inplace=True)
+                else:
+                    climate_deniers_bins = pd.cut(x=climate_deniers[i], bins=dataset_bin, labels=dataset_labels)
+                    climate_deniers_count = climate_deniers.groupby(climate_deniers_bins)[i].agg('count')
+                climate_deniers_count.plot(ax=ax, color='r', label=climate_deniers['Climate Label'].iat[0])
+
+                if i == 'Senate State':
+                    fence_sitters = senate_data[senate_data['Climate Change Support']==2]
+                else:
+                    fence_sitters = abs_subset[abs_subset['Climate Change Support']==2]       
+                if bin_format == 'str':
+                    fence_sitters_count = str_bin.copy(deep=True)
+                    fence_sitters_bins = pd.DataFrame(data=fence_sitters[i].value_counts())
+                    for index, bin_value in fence_sitters_bins.iterrows():
+                        fence_sitters_count.loc[(fence_sitters_count[i]==index), 'Count'] = bin_value[0]
+                    fence_sitters_count.set_index(i, inplace=True)
+                    fence_sitters_count.rename(columns={'Count': fence_sitters['Climate Label'].iat[0]}, inplace=True)
+                else:
+                    fence_sitters_bins = pd.cut(x=fence_sitters[i], bins=dataset_bin, labels=dataset_labels)
+                    fence_sitters_count = fence_sitters.groupby(fence_sitters_bins)[i].agg('count')
+                fence_sitters_count.plot(ax=ax, color='y', label=fence_sitters['Climate Label'].iat[0])
+
+            if show_all_deniers:
+                if i == 'Senate State':
+                    deniers_and_doubters = senate_data[(senate_data['Climate Change Support']>=0) & (senate_data['Climate Change Support']<=2)]
+                else:
+                    deniers_and_doubters = abs_subset[(abs_subset['Climate Change Support']>=0) & (abs_subset['Climate Change Support']<=2)]      
+                if bin_format == 'str':
+                    deniers_and_doubters_count = str_bin.copy(deep=True)
+                    deniers_and_doubters_bins = pd.DataFrame(data=deniers_and_doubters[i].value_counts())
+                    for index, bin_value in deniers_and_doubters_bins.iterrows():
+                        deniers_and_doubters_count.loc[(deniers_and_doubters_count[i]==index), 'Count'] = bin_value[0]
+                    deniers_and_doubters_count.set_index(i, inplace=True)
+                    deniers_and_doubters_count.rename(columns={'Count': 'Deniers and Doubters'}, inplace=True)
+                else:
+                    deniers_and_doubters_bins = pd.cut(x=deniers_and_doubters[i], bins=dataset_bin, labels=dataset_labels)
+                    deniers_and_doubters_count = deniers_and_doubters.groupby(deniers_and_doubters_bins)[i].agg('count')
+                deniers_and_doubters_count.plot(ax=ax, color='b', label='Deniers and Doubters')
+
+            if show_accepts_the_science:
+                if i == 'Senate State':
+                    accepting_of_the_science = senate_data[senate_data['Climate Change Support']==3] 
+                else:
+                    accepting_of_the_science = abs_subset[abs_subset['Climate Change Support']==3]     
+                if bin_format == 'str':
+                    accepting_of_the_science_count = str_bin.copy(deep=True)
+                    accepting_of_the_science_bins = pd.DataFrame(data=accepting_of_the_science[i].value_counts())
+                    for index, bin_value in accepting_of_the_science_bins.iterrows():
+                        accepting_of_the_science_count.loc[(accepting_of_the_science_count[i]==index), 'Count'] = bin_value[0]
+                    accepting_of_the_science_count.set_index(i, inplace=True)
+                    accepting_of_the_science_count.rename(columns={'Count': accepting_of_the_science['Climate Label'].iat[0]}, inplace=True)
+                else:
+                    accepting_of_the_science_bins = pd.cut(x=accepting_of_the_science[i], bins=dataset_bin, labels=dataset_labels)
+                    accepting_of_the_science_count = accepting_of_the_science.groupby(accepting_of_the_science_bins)[i].agg('count')
+                accepting_of_the_science_count.plot(ax=ax, color='g', label=accepting_of_the_science['Climate Label'].iat[0])
+
+            if show_total:             
+                if bin_format == 'str':
+                    if i == 'Senate State':
+                        show_total_bins = pd.DataFrame(data=senate_data[i].value_counts())
+                    else:
+                        show_total_bins = pd.DataFrame(data=abs_subset[i].value_counts())
+                    show_total_count = str_bin.copy(deep=True)
+                    for index, bin_value in show_total_bins.iterrows():
+                        show_total_count.loc[(show_total_count[i]==index), 'Count'] = bin_value[0]
+                    show_total_count.set_index(i, inplace=True)
+                    show_total_count.rename(columns={'Count': 'Total ' + abs_cat}, inplace=True)
+                else:
+                    show_total_bins = pd.cut(x=abs_subset[i], bins=dataset_bin, labels=dataset_labels) 
+                    show_total_count = abs_subset.groupby(show_total_bins)[i].agg('count')
+                show_total_count.plot(ax=ax, color='k', label='Total ' + abs_cat)
+
+            ax.grid(True)
+            ax.legend()
+            ax_number += 1
 
 
-rel_str = ''
-if show_relative:
-    rel_str = 'Relative Axes '
+    rel_str = ''
+    if show_relative:
+        rel_str = 'Relative Axes '
 
-den_str = ''
-if show_all_deniers:
-    den_str = 'All Deniers '
-    
-plt.suptitle(rel_str + 'Federal Climate Change Denial Electoral Representation by ' + abs_cat)
-plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
-if to_screen:
-    plt.show()
-else:
-    output_path = './diagrams/line graphs/' + rel_str + 'Representation by ' + den_str + abs_cat + '.png'
-    plt.savefig(output_path)
+    den_str = ''
+    if show_all_deniers:
+        den_str = 'All Deniers '
+        
+    plt.suptitle(rel_str + 'Federal Climate Change Denial Electoral Representation by ' + abs_cat)
+    plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
+    if to_screen:
+        plt.show()
+    else:
+        output_path = './diagrams/line graphs/' + rel_str + 'Representation by ' + den_str + abs_cat + '.png'
+        plt.savefig(output_path)
 
 

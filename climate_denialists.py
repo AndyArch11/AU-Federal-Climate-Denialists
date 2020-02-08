@@ -24,6 +24,9 @@ __maintainer__ = "Andrew Arch"
 __email__ = "andy.arch11@gmail.com"
 __status__ = "Production"
 
+#determine what to show
+to_screen = True
+
 #create figure to host map.  N.B. if this is declared after Basemap, it will plot points to its own window
 fig = plt.figure(figsize=[24, 13], constrained_layout=True)
 ax = fig.add_subplot()
@@ -811,8 +814,10 @@ def plot_map(sf):
     ax.text(accepts_science_txt_x, representative_voter_values_y, str(format(representative_accepting_of_the_science['Enrolled Voters'].sum(),',')), horizontalalignment='center', color='k', transform=ax.transAxes, fontsize=10)
 
     #display the map
-    #plt.show()
-    plt.savefig('./diagrams/Federal_Climate_Denialists.png')
+    if to_screen:
+        plt.show()
+    else:
+        plt.savefig('./diagrams/Federal_Climate_Denialists.png')
 
 #read the shape file
 sf = shp.Reader('./data/national-esri-fe2019/COM_ELB_region.shp')
